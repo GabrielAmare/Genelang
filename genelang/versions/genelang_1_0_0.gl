@@ -1,0 +1,139 @@
+@ KW_PATTERN str '@'
+@ KW_MATCH str '$'
+@ KW_CALL str '>'
+@ KW_RE kw 're'
+@ KW_KW kw 'kw'
+@ KW_STR kw 'str'
+@ KW_IGNORE kw 'ignore'
+@ KW_AS kw 'as'
+@ KW_IN kw 'in'
+@ KW_WHILE kw 'while'
+@ KW_FORK kw 'fork'
+@ KW_ANY kw 'any'
+@ KW_OPTIONAL kw 'optional'
+@ KW_BUILD kw 'build'
+@ VAR re '[a-zA-Z_][a-zA-Z0-9_]*'
+@ INT re '[0-9]+'
+@ STR re "'.*?'" 16
+@ STR re '".*?"' 16
+@ EQUAL str '='
+@ LP str '('
+@ RP str ')'
+@ LS str '{'
+@ RS str '}'
+@ LB str '['
+@ RB str ']'
+@ COMA str ','
+@ WHITESPACE re '[ \t\n]' 16 ignore
+@ ERROR re '.+' 16
+
+build(Pattern){
+    $KW_PATTERN
+    $VAR as name
+    any{
+        $KW_RE
+        $KW_STR
+        $KW_KW
+    } as mode
+    $STR as expr
+    optional{ $INT as flag }
+    optional{ $KW_IGNORE as ignore_ }
+}
+
+build(Match){
+    $KW_MATCH
+    $VAR as name
+}
+build(Call){
+    $KW_CALL
+    $VAR as name
+}
+
+build(While){
+    $KW_WHILE
+    >InstructionList
+}
+build(Optional){
+    $KW_OPTIONAL
+    >InstructionList
+}
+build(Any){
+    $KW_ANY
+    >InstructionList
+}
+
+build(In){
+    >RawInstruction as process
+    $KW_IN
+    $VAR as key
+}
+build(As){
+    >RawInstruction as process
+    $KW_AS
+    $VAR as key
+}
+
+build(Build){
+    $KW_BUILD
+    $LP
+    $VAR as name
+    $RP
+    >Instruction as process
+}
+
+build(NamedProcess){
+    $VAR as name
+    >Branch as process
+}
+
+build(Branch){
+    >InstructionList
+}
+
+build(Parser){
+    while{
+        any{
+            >Build
+            >NamedProcess
+        } in builds
+    }
+}
+build(Lexer){
+    while{
+        >Pattern in patterns
+    }
+}
+
+InstructionList{
+    $LS
+    while{
+        >Instruction in instructions
+    }
+    $RS
+}
+
+RawInstruction{
+    any{
+        >Match
+        >Call
+        >While
+        >Optional
+        >Any
+        >Build
+        >NamedProcess
+        >Branch
+    }
+}
+
+Instruction{
+    any{
+        >In
+        >As
+        >RawInstruction
+    }
+}
+
+build(Engine){
+    >Lexer as lexer
+    >Parser as parser
+}
