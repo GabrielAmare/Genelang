@@ -13,3 +13,7 @@ class Call(Process):
             raise Exception(f"The process {self.name} doesn't exists !")
         result = process.build(parser, tokens, at_position)
         return CallResult(self, at_position, result)
+
+    @classmethod
+    def ast2py(cls, ast: dict, parser: callable):
+        return cls(name=ast['name'])

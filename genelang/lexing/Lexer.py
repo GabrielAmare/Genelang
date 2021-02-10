@@ -6,21 +6,6 @@ class Lexer:
     def __init__(self, *patterns):
         self.patterns = patterns
 
-    @property
-    def as_python(self):
-        return f"{self.__class__.__name__}(" + ", ".join(pattern.as_python for pattern in self.patterns) + ")"
-
-    @property
-    def as_genelang(self):
-        return "\n".join(pattern.as_genelang for pattern in self.patterns)
-
-    @classmethod
-    def from_ast(cls, ast: dict):
-        patterns = list(map(Pattern.from_ast, ast.get('patterns', [])))
-        return cls(
-            *patterns
-        )
-
     def i_tokenize(self, text: str):
         at_index, at_position = 0, 0
         length = len(text)
@@ -38,3 +23,7 @@ class Lexer:
 
     def tokenize(self, text: str):
         return TokenList(self.i_tokenize(text))
+
+    @classmethod
+    def ast2py(cls, ast: dict, parser: callable):
+        return cls(*map(parser, ast['patterns']))

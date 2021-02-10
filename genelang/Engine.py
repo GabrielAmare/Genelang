@@ -26,3 +26,10 @@ class Engine:
         result.build(data, pile)
 
         return pile[-1]
+
+    @classmethod
+    def ast2py(cls, ast: dict, parser: callable):
+        return cls(
+            lexer=parser(ast['lexer']),
+            parser=parser(ast['parser'])
+        )

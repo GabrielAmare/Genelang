@@ -20,3 +20,7 @@ class Branch(Process):
                 at_position = instruction_result.to_position
 
         return branch_result
+
+    @classmethod
+    def ast2py(cls, ast: dict, parser: callable):
+        return cls(*map(parser, ast['instructions']))

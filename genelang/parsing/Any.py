@@ -16,3 +16,7 @@ class Any(Process):
             instruction_result = None
 
         return AnyResult(self, at_position, instruction_result)
+
+    @classmethod
+    def ast2py(cls, ast: dict, parser: callable):
+        return cls(*map(parser, ast['instructions']))

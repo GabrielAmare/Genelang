@@ -14,3 +14,8 @@ class Parser:
 
     def build(self, tokens: TokenList):
         return self.default.build(parser=self, tokens=tokens, at_position=0)
+
+    @classmethod
+    def ast2py(cls, ast: dict, parser: callable):
+        *builds, default = map(parser, ast['builds'])
+        return cls(*builds, default=default)

@@ -1,3 +1,5 @@
+import os
+import re
 from importlib import import_module
 from .parsing import *
 from .lexing import *
@@ -5,68 +7,6 @@ from .sugar import *
 from .Parser import Parser
 from .Engine import Engine
 from .functions import indent
-
-
-def ast2genelang(ast: dict):
-    __class__ = ast['__class__']
-    if __class__ == "Engine":
-        return Engine(
-            lexer=ast2genelang(ast['lexer']),
-            parser=ast2genelang(ast['parser'])
-        )
-    elif __class__ == "Parser":
-        *builds, default = map(ast2genelang, ast['builds'])
-        return Parser(*builds, default=default)
-    elif __class__ == "Lexer":
-        return Lexer(*map(ast2genelang, ast['patterns']))
-    elif __class__ == "Build":
-        return Build(
-            name=ast['name'],
-            process=ast2genelang(ast['process'])
-        )
-    elif __class__ == "Branch":
-        return Branch(*map(ast2genelang, ast['instructions']))
-    elif __class__ == "Match":
-        return Match(
-            name=ast['name']
-        )
-    elif __class__ == "As":
-        return As(
-            key=ast['key'],
-            process=ast2genelang(ast['process'])
-        )
-    elif __class__ == "In":
-        return In(
-            key=ast['key'],
-            process=ast2genelang(ast['process'])
-        )
-    elif __class__ == "Any":
-        return Any(*map(ast2genelang, ast['instructions']))
-    elif __class__ == "Optional":
-        return Optional(*map(ast2genelang, ast['instructions']))
-    elif __class__ == "While":
-        return While(*map(ast2genelang, ast['instructions']))
-    elif __class__ == "Call":
-        return Call(name=ast['name'])
-    elif __class__ == "NamedProcess":
-        return NamedProcess(name=ast['name'], process=ast2genelang(ast['process']))
-    elif __class__ == "Pattern":
-        return Pattern(
-            name=ast['name'],
-            mode=ast['mode'],
-            expr=eval(ast['expr']),
-            flag=int(ast.get('flag', 0)),
-            ignore=bool(ast.get('ignore_'))
-        )
-    elif __class__ == "Bloc":
-        return Bloc(
-            ast['left'],
-            ast['right'],
-            *map(ast2genelang, ast['instructions'])
-        )
-    else:
-        raise Exception(f"Unable to ast2genelang code corresponding to {__class__}, {ast}")
-
 
 INDENT = "    "
 
@@ -81,7 +21,7 @@ def python2str(obj):
     elif isinstance(obj, Pattern):
         return f"{obj.__class__.__name__}({repr(obj.name)}, {repr(obj.mode)}, {repr(obj.expr)}, {repr(obj.flag)}, {repr(obj.ignore)})"
     elif isinstance(obj, Parser):
-        body = indent(",\n".join(map(python2str, obj.builds)) + f",\ndefault={python2str(obj.default)}",prefix=INDENT)
+        body = indent(",\n".join(map(python2str, obj.builds)) + f",\ndefault={python2str(obj.default)}", prefix=INDENT)
         return f"{obj.__class__.__name__}(\n{body}\n)"
     elif isinstance(obj, Build):
         body = indent(f"{repr(obj.name)},\n{python2str(obj.process)}", prefix=INDENT)
@@ -104,6 +44,15 @@ def python2str(obj):
     elif isinstance(obj, Any):
         body = indent(",\n".join(map(python2str, obj.instructions)), prefix=INDENT)
         return f"{obj.__class__.__name__}(\n{body}\n)"
+    elif isinstance(obj, LUnary):
+        body = indent(f"{repr(obj.key)},\n" + ",\n".join(map(python2str, obj.instructions)), prefix=INDENT)
+        return f"{obj.__class__.__name__}(\n{body}\n)"
+    elif isinstance(obj, RUnary):
+        body = indent(f"{repr(obj.key)},\n" + ",\n".join(map(python2str, obj.instructions)), prefix=INDENT)
+        return f"{obj.__class__.__name__}(\n{body}\n)"
+    elif isinstance(obj, Binary):
+        body = indent(f"{repr(obj.key)},\n{python2str(obj.left)},\n{python2str(obj.right)}", prefix=INDENT)
+        return f"{obj.__class__.__name__}(\n{body}\n)"
     elif isinstance(obj, Call):
         return f"{obj.__class__.__name__}({repr(obj.name)})"
     elif isinstance(obj, NamedProcess):
@@ -118,19 +67,56 @@ def python2str(obj):
 
 
 class Genelang:
+    __versions__ = "C:/Users/gabri/Documents/projets/Genelang/genelang/versions"
+
     @classmethod
-    def load_engine(cls, version):
-        module = import_module(name=f"genelang.versions.{cls.filename(version)}")
+    def ast2py(cls, ast: dict):
+        return eval(ast['__class__']).ast2py(ast, cls.ast2py)
+
+    @classmethod
+    def latest_version(cls):
+        versions = []
+        for filename in os.listdir(cls.__versions__):
+            if match := re.match(r"^genelang_([0-9]+)_([0-9]+)_([0-9]+).py$", filename):
+                major, minor, patch = map(int, match.groups())
+                versions.append((major, minor, patch))
+
+        return sorted(versions)[-1]
+
+    @classmethod
+    def load_engine(cls, version=None):
+        if version is None:
+            version = cls.latest_version()
+
+        module = import_module(name=f".{cls.filename(version)}", package="genelang.versions")
         return module.engine
 
     @classmethod
     def save_engine(cls, version, engine):
-        with open(f"genelang/versions/{cls.filename(version)}.py", mode="w", encoding="utf-8") as file:
+        with open(f"{cls.__versions__}/{cls.filename(version)}.py", mode="w", encoding="utf-8") as file:
             file.write(f"from genelang import *\n\nengine = {cls.python2str(engine)}\n")
 
     @classmethod
     def filename(cls, version):
         return f"genelang_{version[0]}_{version[1]}_{version[2]}"
 
-    ast2genelang = staticmethod(ast2genelang)
+    @classmethod
+    def make_transpiler(cls, target, version=None):
+        """
+            From a genelang file `target` and a genelang `version` indicator,
+            create a .py file corresponding to target
+        """
+        if version is None:
+            version = cls.latest_version()
+        engine = cls.load_engine(version)
+
+        ast = engine.read(f"{target}.gl")
+
+        transpiler = cls.ast2py(ast)
+
+        content = f"from genelang import *\n\nengine = {cls.python2str(transpiler)}\n"
+
+        with open(f"{target}.py", mode="w", encoding="utf-8") as file:
+            file.write(content)
+
     python2str = staticmethod(python2str)

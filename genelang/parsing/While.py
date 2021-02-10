@@ -25,3 +25,7 @@ class While(Process):
             at_position = branch_result.to_position
 
         return while_result
+
+    @classmethod
+    def ast2py(cls, ast: dict, parser: callable):
+        return cls(*map(parser, ast['instructions']))

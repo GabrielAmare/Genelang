@@ -56,3 +56,13 @@ class Pattern:
         else:
             if text.startswith(self.expr, at_index):
                 return Token(pattern=self, content=self.expr, at_index=at_index, at_position=at_position)
+
+    @classmethod
+    def ast2py(cls, ast: dict, parser: callable):
+        return cls(
+            name=ast['name'],
+            mode=ast['mode'],
+            expr=eval(ast['expr']),
+            flag=int(ast.get('flag', 0)),
+            ignore=bool(ast.get('ignore_'))
+        )

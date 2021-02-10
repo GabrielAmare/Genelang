@@ -3,16 +3,14 @@ from genelang.lexing import TokenList
 from genelang.results import Result
 
 
-class Bloc(Process):
-    def __init__(self, left: str, right: str, *instructions):
-        self.left = left
-        self.right = right
+class LUnary(Process):
+    def __init__(self, key: str, *instructions):
+        self.key = key
         self.instructions = instructions
 
         self.process = Branch(
-            Match(self.left),
-            *self.instructions,
-            Match(self.right)
+            Match(self.key),
+            *self.instructions
         )
 
     def build(self, parser, tokens: TokenList, at_position: int) -> Result:
@@ -20,4 +18,4 @@ class Bloc(Process):
 
     @classmethod
     def ast2py(cls, ast: dict, parser: callable):
-        return cls(ast['left'], ast['right'], *map(parser, ast['instructions']))
+        return cls(ast['key'], *map(parser, ast['instructions']))

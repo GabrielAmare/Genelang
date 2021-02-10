@@ -20,3 +20,7 @@ class Match(Process):
             token=token,
             valid=valid
         )
+
+    @classmethod
+    def ast2py(cls, ast: dict, parser: callable):
+        return cls(name=ast['name'])

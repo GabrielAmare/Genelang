@@ -11,3 +11,7 @@ class Optional(Process):
     def build(self, parser, tokens: TokenList, at_position: int) -> OptionalResult:
         branch_result = self.branch.build(parser, tokens, at_position)
         return OptionalResult(self, at_position, branch_result)
+
+    @classmethod
+    def ast2py(cls, ast: dict, parser: callable):
+        return cls(*map(parser, ast['instructions']))

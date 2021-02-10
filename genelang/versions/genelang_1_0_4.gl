@@ -1,0 +1,137 @@
+@ KW_PATTERN str '@'
+@ KW_MATCH str '$'
+@ KW_CALL str '>'
+@ KW_RE kw 're'
+@ KW_KW kw 'kw'
+@ KW_STR kw 'str'
+@ KW_IGNORE kw 'ignore'
+@ KW_AS kw 'as'
+@ KW_IN kw 'in'
+@ KW_WHILE kw 'while'
+@ KW_FORK kw 'fork'
+@ KW_ANY kw 'any'
+@ KW_OPTIONAL kw 'optional'
+@ KW_BUILD kw 'build'
+@ KW_BLOC kw 'bloc'
+@ KW_L_UNARY kw 'l_unary'
+@ KW_R_UNARY kw 'r_unary'
+@ KW_BINARY kw 'binary'
+
+@ VAR re '[a-zA-Z_][a-zA-Z0-9_]*'
+@ INT re '[0-9]+'
+@ STR re "'.*?'" 16
+@ STR re '".*?"' 16
+@ EQUAL str '='
+@ LP str '('
+@ RP str ')'
+@ LS str '{'
+@ RS str '}'
+@ LB str '['
+@ RB str ']'
+@ COMA str ','
+@ WHITESPACE re '[ \t\n]' 16 ignore
+@ ERROR re '.+' 16
+
+build(Pattern){
+    l_unary(KW_PATTERN){
+        $VAR as name
+        any{ $KW_RE $KW_STR $KW_KW } as mode
+        $STR as expr
+        optional{ $INT as flag }
+        optional{ $KW_IGNORE as ignore_ }
+    }
+}
+
+build(Match){ l_unary(KW_MATCH){ $VAR as name } }
+build(Call){ l_unary(KW_CALL){ $VAR as name } }
+build(While){ l_unary(KW_WHILE){ >InstructionList } }
+build(Optional){ l_unary(KW_OPTIONAL){ >InstructionList } }
+build(Any){ l_unary(KW_ANY){ >InstructionList } }
+build(Branch){ >InstructionList }
+
+build(Bloc){
+    l_unary(KW_BLOC){
+        bloc(LP, RP){
+            $VAR as left
+            $COMA
+            $VAR as right
+        }
+        >InstructionList
+    }
+}
+build(LUnary){
+    l_unary(KW_L_UNARY){
+        bloc(LP, RP){ $VAR as key }
+        >InstructionList
+    }
+}
+build(RUnary){
+    l_unary(KW_R_UNARY){
+        bloc(LP, RP){ $VAR as key }
+        >InstructionList
+    }
+}
+build(Binary){
+    l_unary(KW_BINARY){
+        bloc(LP, RP){ $VAR as key }
+        bloc(LS, RS){ >Instruction as left >Instruction as right }
+    }
+}
+
+build(In){
+    binary(KW_IN){
+        >RawInstruction as process
+        $VAR as key
+    }
+}
+build(As){
+    binary(KW_AS){
+        >RawInstruction as process
+        $VAR as key
+    }
+}
+
+build(Build){
+    l_unary(KW_BUILD){
+        bloc(LP, RP){ $VAR as name }
+        >Instruction as process
+    }
+}
+
+build(NamedProcess){ $VAR as name >Branch as process }
+
+
+build(Parser){ while{ any{ >Build >NamedProcess } in builds } }
+build(Lexer){ while{ >Pattern in patterns } }
+
+InstructionList{ bloc(LS, RS){ while{ >Instruction in instructions } } }
+
+RawInstruction{
+    any{
+        >Match
+        >Call
+        >While
+        >Optional
+        >Any
+        >Build
+        >Bloc
+        >LUnary
+        >RUnary
+        >Binary
+        >NamedProcess
+        >Branch
+    }
+}
+
+Instruction{
+    any{
+        >In
+        >As
+        >RawInstruction
+    }
+}
+
+build(Engine){
+    >Lexer as lexer
+    >Parser as parser
+}

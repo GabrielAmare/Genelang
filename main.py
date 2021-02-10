@@ -5,7 +5,7 @@ import os
 def auto_copy(version):
     generated_engine = Genelang.load_engine(version=version)
     ast = generated_engine.read(filepath=f"genelang/versions/{Genelang.filename(version)}.gl")
-    new_engine = Genelang.ast2genelang(ast)
+    new_engine = Genelang.ast2py(ast)
     Genelang.save_engine((version[0], version[1], f"{version[2]}_test"), new_engine)
 
     with open(
@@ -30,7 +30,7 @@ def auto_copy(version):
 def build_next(version_to_use, version_to_build):
     generated_engine = Genelang.load_engine(version=version_to_use)
     ast = generated_engine.read(filepath=f"genelang/versions/{Genelang.filename(version_to_build)}.gl")
-    new_engine = Genelang.ast2genelang(ast)
+    new_engine = Genelang.ast2py(ast)
     Genelang.save_engine(version_to_build, new_engine)
 
 
