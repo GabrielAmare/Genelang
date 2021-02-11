@@ -15,6 +15,9 @@ class Bloc(Process):
             Match(self.right)
         )
 
+    def __repr__(self):
+        return f"Bloc({repr(self.left)}, {repr(self.right)}, " + ", ".join(map(repr, self.instructions)) + ")"
+
     def build(self, parser, tokens: TokenList, at_position: int) -> Result:
         return self.process.build(parser, tokens, at_position)
 

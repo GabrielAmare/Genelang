@@ -1,11 +1,18 @@
 from genelang.lexing import TokenList
-from genelang.parsing import Build
+from genelang.parsing import Build, NamedProcess
 
 
 class Parser:
-    def __init__(self, *builds, default: Build):
+    def __init__(self, *builds):
+        assert all(isinstance(build, (Build, NamedProcess)) for build in builds)
         self.builds = builds
-        self.default = default
+
+    @property
+    def default(self):
+        return self.builds[-1]
+
+    def __repr__(self):
+        return f"Parser(" + ", ".join(map(repr, self.builds)) + ")"
 
     def get_builder(self, name):
         for build in self.builds:
@@ -17,5 +24,4 @@ class Parser:
 
     @classmethod
     def ast2py(cls, ast: dict, parser: callable):
-        *builds, default = map(parser, ast['builds'])
-        return cls(*builds, default=default)
+        return cls(*map(parser, ast['builds']))

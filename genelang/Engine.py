@@ -1,5 +1,5 @@
 import sys
-from genelang.lexing import Lexer, TokenList
+from genelang.lexing import Lexer
 from .Parser import Parser
 
 
@@ -7,6 +7,9 @@ class Engine:
     def __init__(self, lexer: Lexer, parser: Parser):
         self.lexer = lexer
         self.parser = parser
+
+    def __repr__(self):
+        return f"Engine({self.lexer}, {self.parser})"
 
     def read_text(self, text: str):
         tokens = self.lexer.tokenize(text)

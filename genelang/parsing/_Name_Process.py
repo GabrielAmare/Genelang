@@ -7,7 +7,7 @@ class _Name_Process(Process):
         self.process = process
 
     def __repr__(self):
-        return f"{self.__class__}({repr(self.name)}, {repr(self.process)})"
+        return f"{self.__class__.__name__}({repr(self.name)}, {repr(self.process)})"
 
     @classmethod
     def ast2py(cls, ast: dict, parser: callable):

@@ -13,6 +13,9 @@ class LUnary(Process):
             *self.instructions
         )
 
+    def __repr__(self):
+        return f"LUnary({repr(self.key)}, " + ", ".join(map(repr, self.instructions)) + ")"
+
     def build(self, parser, tokens: TokenList, at_position: int) -> Result:
         return self.process.build(parser, tokens, at_position)
 
