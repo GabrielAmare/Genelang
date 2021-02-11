@@ -9,4 +9,4 @@ class AsResult(ResultUnit):
 
     def build(self, data: dict, pile: list) -> None:
         self.result.build({}, pile)
-        data[self.process.key] = pile.pop(-1)
+        data[self.process.name] = pile.pop(-1)

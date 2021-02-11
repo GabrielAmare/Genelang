@@ -81,13 +81,13 @@ build(Binary){
 build(In){
     binary(KW_IN){
         >RawInstruction as process
-        $VAR as key
+        $VAR as name
     }
 }
 build(As){
     binary(KW_AS){
         >RawInstruction as process
-        $VAR as key
+        $VAR as name
     }
 }
 

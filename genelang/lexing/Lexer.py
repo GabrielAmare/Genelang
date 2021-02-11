@@ -6,6 +6,9 @@ class Lexer:
     def __init__(self, *patterns):
         self.patterns = patterns
 
+    def __repr__(self):
+        return "Lexer(" + ", ".join(map(repr, self.patterns)) + ")"
+
     def i_tokenize(self, text: str):
         at_index, at_position = 0, 0
         length = len(text)

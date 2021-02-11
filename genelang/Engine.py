@@ -8,11 +8,8 @@ class Engine:
         self.lexer = lexer
         self.parser = parser
 
-    def read(self, filepath):
-        with open(filepath, mode="r", encoding="utf-8") as file:
-            content = file.read()
-
-        tokens = self.lexer.tokenize(content)
+    def read_text(self, text: str):
+        tokens = self.lexer.tokenize(text)
         result = self.parser.build(tokens)
 
         unparsed = len(tokens[result.to_position:])
@@ -20,12 +17,18 @@ class Engine:
         if unparsed:
             prefixes = [">>" if result.to_position == token.at_position else "  " for token in tokens]
             content = repr(tokens)
-            print("\n".join(prefix+line for prefix, line in zip(prefixes, content.split('\n'))), file=sys.stderr)
+            print("\n".join(prefix + line for prefix, line in zip(prefixes, content.split('\n'))), file=sys.stderr)
 
         data, pile = {}, []
         result.build(data, pile)
 
         return pile[-1]
+
+    def read_file(self, filepath: str):
+        with open(filepath, mode="r", encoding="utf-8") as file:
+            text = file.read()
+
+        return self.read_text(text)
 
     @classmethod
     def ast2py(cls, ast: dict, parser: callable):

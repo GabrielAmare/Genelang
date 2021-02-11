@@ -22,6 +22,9 @@ class Pattern:
         else:
             self.regex = None
 
+    def __repr__(self):
+        return f"Pattern(name={repr(self.name)}, mode={repr(self.mode)}, expr={repr(self.expr)}, flag={repr(self.flag)}, ignore={repr(self.ignore)})"
+
     @property
     def as_python(self):
         optionals = ""

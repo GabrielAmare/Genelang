@@ -9,5 +9,5 @@ class InResult(ResultUnit):
 
     def build(self, data: dict, pile: list) -> None:
         self.result.build({}, pile)
-        data.setdefault(self.process.key, [])
-        data[self.process.key].append(pile.pop(-1))
+        data.setdefault(self.process.name, [])
+        data[self.process.name].append(pile.pop(-1))

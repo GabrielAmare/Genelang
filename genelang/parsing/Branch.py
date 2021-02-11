@@ -1,13 +1,9 @@
-from .Process import Process
+from .ProcessList import ProcessList
 from genelang.lexing import TokenList
 from genelang.results import BranchResult
 
 
-class Branch(Process):
-    def __init__(self, *instructions):
-        assert all(isinstance(instruction, Process) for instruction in instructions)
-        self.instructions = instructions
-
+class Branch(ProcessList):
     def build(self, parser, tokens: TokenList, at_position: int) -> BranchResult:
         branch_result = BranchResult(self, at_position)
 
@@ -20,7 +16,3 @@ class Branch(Process):
                 at_position = instruction_result.to_position
 
         return branch_result
-
-    @classmethod
-    def ast2py(cls, ast: dict, parser: callable):
-        return cls(*map(parser, ast['instructions']))

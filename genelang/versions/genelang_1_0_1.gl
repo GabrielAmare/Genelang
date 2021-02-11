@@ -56,12 +56,12 @@ build(Bloc){
 build(In){
     >RawInstruction as process
     $KW_IN
-    $VAR as key
+    $VAR as name
 }
 build(As){
     >RawInstruction as process
     $KW_AS
-    $VAR as key
+    $VAR as name
 }
 
 build(Build){

@@ -177,7 +177,7 @@ engine = Engine(
                 Binary(
                     'KW_IN',
                     As('process', Call('RawInstruction')),
-                    As('key', Match('VAR'))
+                    As('name', Match('VAR'))
                 )
             )
         ),
@@ -187,7 +187,7 @@ engine = Engine(
                 Binary(
                     'KW_AS',
                     As('process', Call('RawInstruction')),
-                    As('key', Match('VAR'))
+                    As('name', Match('VAR'))
                 )
             )
         ),

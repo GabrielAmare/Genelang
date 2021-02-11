@@ -156,7 +156,7 @@ engine = Engine(
             Branch(
                 As('process', Call('RawInstruction')),
                 Match('KW_IN'),
-                As('key', Match('VAR'))
+                As('name', Match('VAR'))
             )
         ),
         Build(
@@ -164,7 +164,7 @@ engine = Engine(
             Branch(
                 As('process', Call('RawInstruction')),
                 Match('KW_AS'),
-                As('key', Match('VAR'))
+                As('name', Match('VAR'))
             )
         ),
         Build(
