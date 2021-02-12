@@ -19,8 +19,13 @@ class Parser:
             if build.name == name:
                 return build
 
-    def build(self, tokens: TokenList):
-        return self.default.build(parser=self, tokens=tokens, at_position=0)
+    def build(self, tokens: TokenList, base=None):
+        if base:
+            process = self.get_builder(base) or self.default
+        else:
+            process = self.default
+
+        return process.build(parser=self, tokens=tokens, at_position=0)
 
     @classmethod
     def ast2py(cls, ast: dict, parser: callable):

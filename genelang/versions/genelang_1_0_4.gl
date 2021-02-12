@@ -61,19 +61,19 @@ build(Bloc){
 }
 build(LUnary){
     l_unary(KW_L_UNARY){
-        bloc(LP, RP){ $VAR as key }
+        bloc(LP, RP){ $VAR as name }
         >InstructionList
     }
 }
 build(RUnary){
     l_unary(KW_R_UNARY){
-        bloc(LP, RP){ $VAR as key }
+        bloc(LP, RP){ $VAR as name }
         >InstructionList
     }
 }
 build(Binary){
     l_unary(KW_BINARY){
-        bloc(LP, RP){ $VAR as key }
+        bloc(LP, RP){ $VAR as name }
         bloc(LS, RS){ >Instruction as left >Instruction as right }
     }
 }

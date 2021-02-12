@@ -11,9 +11,9 @@ class Engine:
     def __repr__(self):
         return f"Engine({self.lexer}, {self.parser})"
 
-    def read_text(self, text: str):
+    def read_text(self, text: str, base=None):
         tokens = self.lexer.tokenize(text)
-        result = self.parser.build(tokens)
+        result = self.parser.build(tokens, base=base)
 
         unparsed = len(tokens[result.to_position:])
 
