@@ -4,21 +4,21 @@ from genelang.results import Result
 
 
 class LUnary(Process):
-    def __init__(self, name: str, *instructions):
+    def __init__(self, name: str, *items):
         self.name = name
-        self.instructions = instructions
+        self.items = items
 
         self.process = Branch(
             Match(self.name),
-            *self.instructions
+            *self.items
         )
 
     def __repr__(self):
-        return f"LUnary({repr(self.name)}, " + ", ".join(map(repr, self.instructions)) + ")"
+        return f"LUnary({repr(self.name)}, " + ", ".join(map(repr, self.items)) + ")"
 
     def build(self, parser, tokens: TokenList, at_position: int) -> Result:
         return self.process.build(parser, tokens, at_position)
 
     @classmethod
     def ast2py(cls, ast: dict, parser: callable):
-        return cls(ast['name'], *map(parser, ast['instructions']))
+        return cls(ast['name'], *map(parser, ast['items']))

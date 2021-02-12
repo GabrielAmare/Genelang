@@ -80,7 +80,7 @@ build(Lexer){ while{ >Pattern in patterns } }
 
 InstructionList{
     $LS
-    while{ >Instruction in instructions }
+    while{ >Instruction in items }
     $RS
 }
 

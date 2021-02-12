@@ -107,7 +107,7 @@ build(Lexer){
 InstructionList{
     $LS
     while{
-        >Instruction in instructions
+        >Instruction in items
     }
     $RS
 }

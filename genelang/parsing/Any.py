@@ -5,11 +5,11 @@ from genelang.results import AnyResult
 
 class Any(ProcessList):
     def build(self, parser, tokens: TokenList, at_position: int) -> AnyResult:
-        for instruction in self.instructions:
-            instruction_result = instruction.build(parser, tokens, at_position)
-            if instruction_result.valid:
+        for item in self.items:
+            item_result = item.build(parser, tokens, at_position)
+            if item_result.valid:
                 break
         else:
-            instruction_result = None
+            item_result = None
 
-        return AnyResult(self, at_position, instruction_result)
+        return AnyResult(self, at_position, item_result)

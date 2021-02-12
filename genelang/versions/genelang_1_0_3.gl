@@ -96,7 +96,7 @@ build(NamedProcess){ $VAR as name >Branch as process }
 build(Parser){ while{ any{ >Build >NamedProcess } in builds } }
 build(Lexer){ while{ >Pattern in patterns } }
 
-InstructionList{ bloc(LS, RS){ while{ >Instruction in instructions } } }
+InstructionList{ bloc(LS, RS){ while{ >Instruction in items } } }
 
 RawInstruction{
     any{
