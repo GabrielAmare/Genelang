@@ -14,9 +14,14 @@ class Parser:
     def __repr__(self):
         return f"Parser(" + ", ".join(map(repr, self.builds)) + ")"
 
+    def get_builders(self, identifier):
+        for build in self.builds:
+            if identifier.match(build.identifier):
+                yield build
+
     def get_builder(self, name):
         for build in self.builds:
-            if build.name == name:
+            if build.identifier.name == name:
                 return build
 
     def build(self, tokens: TokenList, base=None):

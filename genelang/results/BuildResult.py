@@ -10,5 +10,5 @@ class BuildResult(ResultUnit):
     def build(self, data: dict, pile: list) -> None:
         n_data = {}
         self.result.build(n_data, pile)
-        n_data['__class__'] = self.process.name
+        n_data['__class__'] = self.process.identifier.name
         pile.append(n_data)

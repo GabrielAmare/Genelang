@@ -1,4 +1,5 @@
 from .AnyResult import AnyResult
+from .ForkResult import ForkResult
 from .AsResult import AsResult
 from .BranchResult import BranchResult
 from .BuildResult import BuildResult
@@ -11,3 +12,5 @@ from .Result import Result
 from .ResultList import ResultList
 from .ResultUnit import ResultUnit
 from .WhileResult import WhileResult
+from .WhileDoResult import WhileDoResult
+from .DoWhileResult import DoWhileResult

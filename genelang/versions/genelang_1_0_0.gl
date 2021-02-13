@@ -1,139 +1,70 @@
 @ KW_PATTERN str '@'
 @ KW_MATCH str '$'
-@ KW_CALL str '>'
 @ KW_RE kw 're'
 @ KW_KW kw 'kw'
 @ KW_STR kw 'str'
 @ KW_IGNORE kw 'ignore'
-@ KW_AS kw 'as'
-@ KW_IN kw 'in'
 @ KW_WHILE kw 'while'
+@ KW_DO kw 'do'
 @ KW_FORK kw 'fork'
 @ KW_ANY kw 'any'
 @ KW_OPTIONAL kw 'optional'
 @ KW_BUILD kw 'build'
+
 @ VAR re '[a-zA-Z_][a-zA-Z0-9_]*'
 @ INT re '[0-9]+'
 @ STR re "'.*?'" 16
 @ STR re '".*?"' 16
 @ EQUAL str '='
+@ LV str '<'
 @ LP str '('
 @ RP str ')'
 @ LS str '{'
 @ RS str '}'
-@ LB str '['
-@ RB str ']'
-@ COMA str ','
+@ STAR str '*'
+@ PLUS str '+'
+@ QUESTION_MARK str '?'
+@ DOT str '.'
+@ COLON str ':'
+@ SEMICOLON str ';'
+@ VBAR str '|'
 @ WHITESPACE re '[ \t\n]' 16 ignore
 @ ERROR re '.+' 16
 
 build(Pattern){
     $KW_PATTERN
-    $VAR as name
-    any{
-        $KW_RE
-        $KW_STR
-        $KW_KW
-    } as mode
-    $STR as expr
-    optional{ $INT as flag }
-    optional{ $KW_IGNORE as ignore_ }
+    name = $VAR
+    mode = $KW_RE|KW_STR|KW_KW
+    expr = $STR
+    ?flag = $INT
+    ?ignore_ = $KW_IGNORE
 }
 
-build(Match){
-    $KW_MATCH
-    $VAR as name
-}
-build(Call){
-    $KW_CALL
-    $VAR as name
-}
+_SCOPE{ $LS; while{ items < $.I; ?$SEMICOLON; } $RS; }
 
-build(While){
-    $KW_WHILE
-    >InstructionList
-}
-build(Optional){
-    $KW_OPTIONAL
-    >InstructionList
-}
-build(Any){
-    $KW_ANY
-    >InstructionList
-}
+build(Group){ $DOT; name = $VAR; }
+build(Identifier){ fork{ name = $VAR }{ groups < $Group } *groups < $Group; }
 
-build(In){
-    >RawInstruction as process
-    $KW_IN
-    $VAR as name
-}
-build(As){
-    >RawInstruction as process
-    $KW_AS
-    $VAR as name
-}
+build(In.I){ name = $VAR; $LV; process = $.I; }
+build(As.I){ name = $VAR; $EQUAL; process = $.I; }
 
-build(Build){
-    $KW_BUILD
-    $LP
-    $VAR as name
-    $RP
-    >Instruction as process
-}
+build(Match.I){ $KW_MATCH; do{ identifiers < $Identifier; }while{ $VBAR; } }
+build(DoWhile.I){ $KW_DO; left = $Branch; $KW_WHILE; right = $Branch; }
+build(WhileDo.I){ $KW_WHILE; left = $Branch; $KW_DO; right = $Branch; }
+build(While.I){ $KW_WHILE; $_SCOPE; }
+build(Optional.I){ $KW_OPTIONAL; $_SCOPE; }
+build(Any.I){ $KW_ANY; $_SCOPE; }
+build(Fork.I){ $KW_FORK; +items < $Branch; }
+build(Branch.I){ $_SCOPE; }
+build(While.I){ $STAR; items < $.I; }
+build(Optional.I){ $QUESTION_MARK; items < $.I; }
+build(WhilePlus.I){ $PLUS; items < $.I; }
 
-build(NamedProcess){
-    $VAR as name
-    >Branch as process
-}
 
-build(Branch){
-    >InstructionList
-}
+build(Build.P){ $KW_BUILD; $LP; identifier = $Identifier; $RP; process = $.I; }
+build(NamedProcess.P){ identifier = $Identifier; process = $Branch; }
 
-build(Parser){
-    while{
-        any{
-            >Build
-            >NamedProcess
-        } in builds
-    }
-}
-build(Lexer){
-    while{
-        >Pattern in patterns
-    }
-}
+build(Parser){ +builds < $.P; }
+build(Lexer){ +patterns < $Pattern; }
 
-InstructionList{
-    $LS
-    while{
-        >Instruction in items
-    }
-    $RS
-}
-
-RawInstruction{
-    any{
-        >Match
-        >Call
-        >While
-        >Optional
-        >Any
-        >Build
-        >NamedProcess
-        >Branch
-    }
-}
-
-Instruction{
-    any{
-        >In
-        >As
-        >RawInstruction
-    }
-}
-
-build(Engine){
-    >Lexer as lexer
-    >Parser as parser
-}
+build(Engine){ lexer = $Lexer; parser = $Parser; }

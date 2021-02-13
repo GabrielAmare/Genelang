@@ -5,6 +5,8 @@ from .lexing import *
 from .sugar import *
 from .Parser import Parser
 from .Engine import Engine
+from .Identifier import Identifier
+from .Group import Group
 
 
 class Genelang:
@@ -19,6 +21,7 @@ class Genelang:
             Pattern=Pattern,
             Parser=Parser,
             Any=Any,
+            Fork=Fork,
             As=As,
             Branch=Branch,
             Build=Build,
@@ -28,10 +31,15 @@ class Genelang:
             NamedProcess=NamedProcess,
             Optional=Optional,
             While=While,
+            DoWhile=DoWhile,
+            WhileDo=WhileDo,
             Binary=Binary,
             Bloc=Bloc,
             LUnary=LUnary,
-            RUnary=RUnary
+            RUnary=RUnary,
+            Identifier=Identifier,
+            Group=Group,
+            WhilePlus=WhilePlus
         )
     )
 
